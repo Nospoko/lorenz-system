@@ -1,86 +1,29 @@
-from typing import Any, Callable
-
 import numpy as np
 import matplotlib.pyplot as plt
-
-
-class RungeKutta4:
-    def __init__(
-        self,
-        fun: Callable,
-        x0: float,
-        y0: np.ndarray | Any,
-        h: float,
-        num: int,
-    ) -> None:
-        """
-        4-th order Runge Kutta ODE solver. Integration is always performed in + direction.
-
-        Args:
-            fun (Callable): Right-hand side of ODE.
-            x0 (float): Beginning of integration interval
-            y0 (np.ndarray | Any): Initial conditions vector
-            h (float): Integration step
-            num (int): Number of steps. Length of result array.
-        """
-        self.fun = fun
-        self.h = h
-        self.x0 = x0
-        self.y0 = y0
-        self.num = num
-
-        # number of equations in a system
-        self.n_eq = len(self.y0)
-
-        # result and node arrays
-        self.result = np.empty((num, self.n_eq))
-        self.nodes = np.empty((num, self.n_eq))
-
-        # current step
-        self.it = 1
-        self.result[0] = y0
-
-        # Runge Kutta method parameters
-        self.gammas = np.array([[1 / 3, 0, 0], [-1 / 3, 1, 0], [1, -1, 1]])
-        self.cs = [1 / 8, 3 / 8, 3 / 8, 1 / 8]
-
-    def step(self):
-        # get previous step results
-        x_i = self.nodes[self.it - 1]
-        y_i = self.result[self.it - 1]
-
-        # calculate ks
-        k0 = self.h * self.fun(x_i, y_i)
-        k1 = self.h * self.fun(x_i + self.h * self.gammas[0][0], y_i + self.gammas[0][0] * k0)
-        k2 = self.h * self.fun(
-            x_i + self.gammas[1, :].sum() * self.h,
-            y_i + self.gammas[1, 0] * k1 + self.gammas[1, 1] * k1,
-        )
-        k3 = self.h * self.fun(
-            x_i + self.gammas[2, :].sum() * self.h,
-            y_i + self.gammas[2, 0] * k1 + self.gammas[2, 1] * k1 + self.gammas[2, 2] * k2,
-        )
-
-        # calculate result
-        self.result[self.it] = y_i + self.cs[0] * k0 + self.cs[1] * k1 + self.cs[2] * k2 + self.cs[3] * k3
-        self.it += 1
-        return self.result[self.it - 1]
-
-    def integrate(self):
-        while self.it < self.num:
-            self.step()
-        return self.result
+from solvers import RungeKutta4
+import streamlit as st
 
 
 def main():
+    parameter_cols = st.columns(3)
     # Define the default parameters values
-    sigma = 10
-    rho = 28
-    beta = 8 / 3
-    x0 = 0
-    y0 = (0.0, 1.0, 1.05)
-    h = 0.01
-    num = 10000
+    with parameter_cols[0]:
+        sigma = st.number_input(label="sigma", value=10.0)
+        y_1 = st.number_input(label="y_1", value=0.0)
+        x0 = st.number_input(label="x0", value=0.0)
+    with parameter_cols[1]:
+        rho = st.number_input(label="rho", value=28.0)
+        y_2 = st.number_input(label="y_2", value=1.0)
+        h = st.number_input(label="step size", value=0.01)
+    with parameter_cols[2]:
+        beta = st.number_input(label="beta", value=8/3)
+        y_3 = st.number_input(label="y_3", value=1.05)
+        num = st.number_input(label="number of steps", value=10000, step = 100)
+    
+    
+    y0 = (y_1, y_2, y_3)
+    
+    
 
     def lorenz(t, y):
         y_1, y_2, y_3 = y
@@ -91,9 +34,17 @@ def main():
 
     rk4 = RungeKutta4(lorenz, x0=x0, y0=y0, h=h, num=num)
     result = rk4.integrate()
+    
+    fig, axes = plt.subplots(3, figsize=(14, 7))
+    labels = ["x", "y", "z"]
+    for it, ax in enumerate(axes):
+        ax.plot(rk4.nodes, result.T[it], label=labels[it])
+        ax.legend()
+    st.pyplot(fig)
 
     # Plot
-    ax = plt.figure().add_subplot(projection="3d")
+    fig = plt.figure(figsize=(14,7))
+    ax = fig.add_subplot(projection="3d")
 
     ax.plot(*result.T, lw=0.5)
     ax.set_xlabel("X Axis")
@@ -101,8 +52,9 @@ def main():
     ax.set_zlabel("Z Axis")
     ax.set_title("Lorenz Attractor")
 
-    plt.show()
-
+    st.pyplot(fig)
+    
+    
 
 if __name__ == "__main__":
     main()
