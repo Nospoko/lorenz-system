@@ -1,7 +1,8 @@
 import numpy as np
-import matplotlib.pyplot as plt
-from solvers import RungeKutta4
 import streamlit as st
+import matplotlib.pyplot as plt
+
+from solvers import RungeKutta4
 
 
 def main():
@@ -16,14 +17,11 @@ def main():
         y_2 = st.number_input(label="y_2", value=1.0)
         h = st.number_input(label="step size", value=0.01)
     with parameter_cols[2]:
-        beta = st.number_input(label="beta", value=8/3)
+        beta = st.number_input(label="beta", value=8 / 3)
         y_3 = st.number_input(label="y_3", value=1.05)
-        num = st.number_input(label="number of steps", value=10000, step = 100)
-    
-    
+        num = st.number_input(label="number of steps", value=10000, step=100)
+
     y0 = (y_1, y_2, y_3)
-    
-    
 
     def lorenz(t, y):
         y_1, y_2, y_3 = y
@@ -34,16 +32,16 @@ def main():
 
     rk4 = RungeKutta4(lorenz, x0=x0, y0=y0, h=h, num=num)
     result = rk4.integrate()
-    
+
     fig, axes = plt.subplots(3, figsize=(14, 7))
-    labels = ["x", "y", "z"]
     for it, ax in enumerate(axes):
-        ax.plot(rk4.nodes, result.T[it], label=labels[it])
+        ax.plot(rk4.nodes, result.T[it], label=f"y_{it + 1}")
         ax.legend()
+    axes[0].set_title("Y(x)")
     st.pyplot(fig)
 
     # Plot
-    fig = plt.figure(figsize=(14,7))
+    fig = plt.figure(figsize=(14, 7))
     ax = fig.add_subplot(projection="3d")
 
     ax.plot(*result.T, lw=0.5)
@@ -53,8 +51,7 @@ def main():
     ax.set_title("Lorenz Attractor")
 
     st.pyplot(fig)
-    
-    
+
 
 if __name__ == "__main__":
     main()

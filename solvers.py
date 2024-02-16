@@ -1,6 +1,6 @@
-from typing import Callable, Any
-import numpy as np
+from typing import Any, Callable
 
+import numpy as np
 
 
 class RungeKutta4:
