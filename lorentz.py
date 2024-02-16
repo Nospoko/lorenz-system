@@ -8,7 +8,7 @@ class RungeKutta4:
     def __init__(
         self,
         fun: Callable,
-        t0: float,
+        x0: float,
         y0: np.ndarray | Any,
         h: float,
         num: int,
@@ -25,7 +25,7 @@ class RungeKutta4:
         """
         self.fun = fun
         self.h = h
-        self.x0 = t0
+        self.x0 = x0
         self.y0 = y0
         self.num = num
 
@@ -46,18 +46,18 @@ class RungeKutta4:
 
     def step(self):
         # get previous step results
-        t_i = self.nodes[self.it - 1]
+        x_i = self.nodes[self.it - 1]
         y_i = self.result[self.it - 1]
 
         # calculate ks
-        k0 = self.h * self.fun(t_i, y_i)
-        k1 = self.h * self.fun(t_i + self.h * self.gammas[0][0], y_i + self.gammas[0][0] * k0)
+        k0 = self.h * self.fun(x_i, y_i)
+        k1 = self.h * self.fun(x_i + self.h * self.gammas[0][0], y_i + self.gammas[0][0] * k0)
         k2 = self.h * self.fun(
-            t_i + self.gammas[1, :].sum() * self.h,
+            x_i + self.gammas[1, :].sum() * self.h,
             y_i + self.gammas[1, 0] * k1 + self.gammas[1, 1] * k1,
         )
         k3 = self.h * self.fun(
-            t_i + self.gammas[2, :].sum() * self.h,
+            x_i + self.gammas[2, :].sum() * self.h,
             y_i + self.gammas[2, 0] * k1 + self.gammas[2, 1] * k1 + self.gammas[2, 2] * k2,
         )
 
@@ -77,25 +77,25 @@ def main():
     sigma = 10
     rho = 28
     beta = 8 / 3
-    t0 = 0
+    x0 = 0
     y0 = (0.0, 1.0, 1.05)
     h = 0.01
     num = 10000
 
-    def lorenz(t, xyz):
-        x, y, z = xyz
-        x_dot = sigma * (y - x)
-        y_dot = rho * x - y - x * z
-        z_dot = x * y - beta * z
-        return np.array([x_dot, y_dot, z_dot])
+    def lorenz(t, y):
+        y_1, y_2, y_3 = y
+        y1_dot = sigma * (y_2 - y_1)
+        y2_dot = rho * y_1 - y_2 - y_1 * y_3
+        y3_dot = y_1 * y_2 - beta * y_3
+        return np.array([y1_dot, y2_dot, y3_dot])
 
-    rk4 = RungeKutta4(lorenz, t0=t0, y0=y0, h=h, num=num)
-    xyzs = rk4.integrate()
+    rk4 = RungeKutta4(lorenz, x0=x0, y0=y0, h=h, num=num)
+    result = rk4.integrate()
 
     # Plot
     ax = plt.figure().add_subplot(projection="3d")
 
-    ax.plot(*xyzs.T, lw=0.5)
+    ax.plot(*result.T, lw=0.5)
     ax.set_xlabel("X Axis")
     ax.set_ylabel("Y Axis")
     ax.set_zlabel("Z Axis")
