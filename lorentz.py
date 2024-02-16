@@ -3,9 +3,6 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 
-
-plt.show()
-
 def main():
     # Define the default parameters values
     sigma = 10
@@ -24,14 +21,11 @@ def main():
 
     solution = RK45(lorenz, t0=t0, y0=y0, t_bound=tmax)
     # collect data
-    t_values = []
-    
     xyzs = []
     it = 0
     while solution.status != 'finished' and solution.status != "failed":
         # get solution step state
         solution.step()
-        t_values.append(solution.t)
         xyzs.append(solution.y)
         it += 1
     
