@@ -30,7 +30,7 @@ def main():
         y3_dot = y_1 * y_2 - beta * y_3
         return np.array([y1_dot, y2_dot, y3_dot])
 
-    st.write("Runge Kutta")
+    st.write("4th-order Runge Kutta")
     rk4 = RungeKutta4(lorenz, x0=x0, y0=y0, h=h, num=num)
     result = rk4.integrate()
 
