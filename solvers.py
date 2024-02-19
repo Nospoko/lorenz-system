@@ -69,3 +69,56 @@ class RungeKutta4:
         while self.it < self.num:
             self.step()
         return self.result
+
+
+class ExplicitEuler:
+    def __init__(
+        self,
+        fun: Callable,
+        x0: float,
+        y0: np.ndarray | Any,
+        h: float,
+        num: int,
+    ) -> None:
+        """
+        Euler ODE solver. Integration is always performed in + direction.
+
+        Args:
+            fun (Callable): Right-hand side of ODE.
+            x0 (float): Beginning of integration interval
+            y0 (np.ndarray | Any): Initial conditions vector
+            h (float): Integration step
+            num (int): Number of steps. Length of result array.
+        """
+        self.fun = fun
+        self.h = h
+        self.x0 = x0
+        self.y0 = y0
+        self.num = num
+
+        # number of equations in a system
+        self.n_eq = len(self.y0)
+
+        # result and node arrays
+        self.result = np.empty((num, self.n_eq))
+        self.nodes = np.arange(x0, x0 + num * h, h)
+
+        # current step
+        self.it = 1
+        self.result[0] = y0
+
+    def step(self):
+        # get previous step results
+        x_i = self.nodes[self.it - 1]
+        y_i = self.result[self.it - 1]
+
+        slope = self.fun(x_i, y_i)
+        self.result[self.it] = y_i + self.h * slope
+        self.it += 1
+
+        return self.result[self.it - 1]
+
+    def integrate(self):
+        while self.it < self.num:
+            self.step()
+        return self.result

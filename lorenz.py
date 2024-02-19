@@ -2,7 +2,7 @@ import numpy as np
 import streamlit as st
 import matplotlib.pyplot as plt
 
-from solvers import RungeKutta4
+from solvers import RungeKutta4, ExplicitEuler
 
 
 def main():
@@ -30,6 +30,7 @@ def main():
         y3_dot = y_1 * y_2 - beta * y_3
         return np.array([y1_dot, y2_dot, y3_dot])
 
+    st.write("Runge Kutta")
     rk4 = RungeKutta4(lorenz, x0=x0, y0=y0, h=h, num=num)
     result = rk4.integrate()
 
@@ -50,6 +51,28 @@ def main():
     ax.set_zlabel("Z Axis")
     ax.set_title("Lorenz Attractor")
 
+    st.pyplot(fig)
+
+    st.write("Explicit Euler")
+    eul = ExplicitEuler(lorenz, x0=x0, y0=y0, h=h, num=num)
+    result = eul.integrate()
+
+    fig, axes = plt.subplots(3, figsize=(14, 7))
+    for it, ax in enumerate(axes):
+        ax.plot(rk4.nodes, result.T[it], label=f"y_{it + 1}")
+        ax.legend()
+    axes[0].set_title("Y(x)")
+    st.pyplot(fig)
+
+    # Plot
+    fig = plt.figure(figsize=(14, 7))
+    ax = fig.add_subplot(projection="3d")
+
+    ax.plot(*result.T, lw=0.5)
+    ax.set_xlabel("X Axis")
+    ax.set_ylabel("Y Axis")
+    ax.set_zlabel("Z Axis")
+    ax.set_title("Lorenz Attractor")
     st.pyplot(fig)
 
 
